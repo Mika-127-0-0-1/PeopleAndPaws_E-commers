@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ImagePlus, Trash } from "lucide-react";
 import Image from "next/image";
-import { CldImage, CldUploadWidget } from "next-cloudinary";
+import { CldUploadWidget } from "next-cloudinary";
 
 interface ImageUploadProps {
     disabled?: boolean;
@@ -46,6 +46,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                         </div>
                         <Image 
                         fill
+                        // sizes=""
                         className="object-cover"
                         alt="Image"
                         src={url}
@@ -60,9 +61,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                     }
 
                     return (
-                        <Button variant="secondary" type="button" disabled={disabled} onClick={onClick} size="icon">
-                            <ImagePlus className="h-4 w-4 mr-2"/>
-                            Upload an Image
+                        <Button variant="secondary" type="button" disabled={disabled} onClick={onClick} size="sm">
+                                <ImagePlus className="h-4 w-4 mr-2"/>
+                                Upload an Image
                         </Button>
                     )
                 }}
