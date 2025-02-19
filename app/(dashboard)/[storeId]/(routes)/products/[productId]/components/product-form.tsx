@@ -3,7 +3,7 @@
 import { z } from "zod";
 import axios from "axios";
 import { useState } from "react";
-import { Category, Color, Image, Product, Size } from "@prisma/client";
+import { Category, Image, Product, Size } from "@prisma/client";
 import { Trash } from "lucide-react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -25,7 +25,7 @@ const formSchema = z.object({
     images: z.object({ url: z.string() }).array(),
     price: z.coerce.number().min(1),
     sizeId: z.string().min(1),
-    colorId: z.string().min(1),
+    // colorId: z.string().min(1),
     categoryId: z.string().min(1),
     isFeatured: z.boolean().default(false).optional(),
     isArchived: z.boolean().default(false).optional(),
@@ -38,14 +38,14 @@ interface ProductFormProps {
         images: Image[]
     } | null;
     categories: Category[];
-    colors: Color[];
+    // colors: Color[];
     sizes: Size[];
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
     initialData,
     sizes,
-    colors,
+    // colors,
     categories 
 }) => {
     const params = useParams();
@@ -70,7 +70,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             isArchived: false,
             price: 0,
             sizeId: "",
-            colorId: "",
+            // colorId: "",
             categoryId: "",
         }
     });
@@ -237,7 +237,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                 <FormMessage />
                             </FormItem>
                         )}/>
-                        <FormField 
+                        {/* <FormField 
                         control={form.control}
                         name="colorId"
                         render={({ field }) => (
@@ -266,7 +266,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                 </Select>
                                 <FormMessage />
                             </FormItem>
-                        )}/>
+                        )}/> */}
                         <FormField 
                         control={form.control}
                         name="isFeatured"

@@ -32,11 +32,11 @@ export function MainNav({
             lable: 'Sizes',
             active: pathname === `/${params.storeId}/sizes` || pathname ===`/${params.storeId}/sizes/new`,
         },
-        {
-            href: `/${params.storeId}/colors`,
-            lable: 'Colors',
-            active: pathname === `/${params.storeId}/colors` || pathname ===`/${params.storeId}/colors/new`,
-        },
+        // {
+        //     href: `/${params.storeId}/colors`,
+        //     lable: 'Colors',
+        //     active: pathname === `/${params.storeId}/colors` || pathname ===`/${params.storeId}/colors/new`,
+        // },
         {
             href: `/${params.storeId}/products`,
             lable: 'Products',
@@ -50,7 +50,7 @@ export function MainNav({
         {
             href: `/${params.storeId}/settings`,
             lable: 'Settings',
-            active: pathname === `/${params.storeId}/settings`,
+            active: pathname === `/${params.storeId}/settings`|| pathname ===`/${params.storeId}/settings/term`|| pathname ===`/${params.storeId}/settings/ship`|| pathname ===`/${params.storeId}/settings/privacy`,
         }
     ];
 

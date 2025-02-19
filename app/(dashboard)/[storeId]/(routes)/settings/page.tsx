@@ -24,6 +24,12 @@ const SettingsPage: React.FC<SettingsPageProps> = async ({
         }
     });
 
+    const socialLink = await prismadb.socialList.findMany({
+        // where: {
+        //     id: params.storeId
+        // }
+    });
+
     if(!store) {
         redirect("/");
     }
@@ -31,7 +37,7 @@ const SettingsPage: React.FC<SettingsPageProps> = async ({
     return(
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
-                <SettingsForm initialData={store}/>
+                <SettingsForm initialData={store} socials={socialLink}/>
             </div>
         </div>
     )

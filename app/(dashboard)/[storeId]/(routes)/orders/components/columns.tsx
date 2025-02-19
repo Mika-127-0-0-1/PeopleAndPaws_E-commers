@@ -7,6 +7,7 @@ import { CellAction } from "./cell-action"
 // You can use a Zod schema here if you want.
 export type OrderColumn = {
   id: string
+  invNumber: string
   phone: string
   address: string
   totalPrice: string
@@ -17,6 +18,10 @@ export type OrderColumn = {
 
 export const columns: ColumnDef<OrderColumn>[] = [
   {
+    accessorKey: "invNumber",
+    header: "Invoice No.",
+  },
+  {
     accessorKey: "products",
     header: "Products",
   },
@@ -26,7 +31,7 @@ export const columns: ColumnDef<OrderColumn>[] = [
   },
   {
     accessorKey: "address",
-    header: "Address",
+    header: "Shipping Address",
   },
   {
     accessorKey: "totalPrice",
@@ -35,5 +40,9 @@ export const columns: ColumnDef<OrderColumn>[] = [
   {
     accessorKey: "isPaid",
     header: "Paid",
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <CellAction data={row.original}/>
   }
 ]

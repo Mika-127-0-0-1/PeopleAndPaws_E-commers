@@ -15,17 +15,21 @@ datasource db {
 }
 
 model Store {
-  id          String      @id @default(uuid())
-  name        String
-  userId      String
-  billboards  Billboard[] @relation("StoreToBillboard")
-  categories  Category[]  @relation("StoreToCategory")
-  sizes       Size[]      @relation("StoreToSize")
-  color       Color[]     @relation("StoreToColor")
-  product     Product[]   @relation("StoreToProduct")
-  orders      Order[]     @relation("StoreToOrder")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id              String      @id @default(uuid())
+  name            String
+  term_condition  String?
+  shiping_returns String?
+  privacy_policy  String?
+  userId          String
+  billboards      Billboard[] @relation("StoreToBillboard")
+  categories      Category[]  @relation("StoreToCategory")
+  sizes           Size[]      @relation("StoreToSize")
+  // color           Color[]     @relation("StoreToColor")
+  socialLists     SocialList[] @relation("StoreToSocialList")
+  product         Product[]   @relation("StoreToProduct")
+  orders          Order[]     @relation("StoreToOrder")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
 
 model Billboard {
@@ -69,18 +73,30 @@ model Size {
   @@index([storeId])
 }
 
-model Color {
+model SocialList {
   id          String      @id @default(uuid())
   storeId     String
-  store       Store       @relation("StoreToColor", fields: [storeId], references: [id])
+  store       Store       @relation("StoreToSocialList", fields: [storeId], references: [id])
   name        String
-  value       String
-  products    Product[]
+  url         String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   @@index([storeId])
 }
+
+// model Color {
+//   id          String      @id @default(uuid())
+//   storeId     String
+//   store       Store       @relation("StoreToColor", fields: [storeId], references: [id])
+//   name        String
+//   value       String
+//   products    Product[]
+//   createdAt   DateTime    @default(now())
+//   updatedAt   DateTime    @updatedAt
+
+//   @@index([storeId])
+// }
 
 model Product {
   id          String      @id @default(uuid())
@@ -94,15 +110,15 @@ model Product {
   isArchived  Boolean     @default(false)
   sizeId      String
   size        Size        @relation(fields: [sizeId], references: [id])
-  colorId     String
-  color       Color       @relation(fields: [colorId], references: [id])
+  // colorId     String
+  // color       Color       @relation(fields: [colorId], references: [id])
   images      Image[]
   orderItems  OrderItem[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   @@index([sizeId])
-  @@index([colorId])
+  // @@index([colorId])
   @@index([categoryId])
   @@index([storeId])
 }
@@ -119,15 +135,39 @@ model Image {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  storeId     String
-  store       Store       @relation("StoreToOrder", fields: [storeId], references: [id])
-  orderItems  OrderItem[]
-  isPaid      Boolean     @default(false)
-  phone       String      @default("")
-  address     String      @default("")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                  String      @id @default(uuid())
+  storeId             String
+  store               Store       @relation("StoreToOrder", fields: [storeId], references: [id])
+  orderItems          OrderItem[]
+  orderNumber         Int         @unique @default(autoincrement())
+  isPaid              Boolean     @default(false)
+  isShipped           Boolean     @default(false)
+  shippingMethod      String
+  phone               String      
+  email               String      
+  firstName           String      
+  lastName            String      
+  vatNumber           String?
+  company             String?
+  address             String
+  //   streetAddress: z.string().min(1),
+  //   flatNO: z.string().optional(),
+  //   country: z.string().min(1),
+  //   province: z.string().min(1),
+  //   city: z.string().min(1),
+  //   suburb: z.string().min(1),
+  //   postal: z.string().min(4).max(4),
+  shippingAddress     String      @default("")
+  //   SHstreetAddress: z.string().min(1).optional(),
+  //   SHflatNO: z.string().optional().optional(),
+  //   SHcountry: z.string().min(1).optional(),
+  //   SHprovince: z.string().min(1).optional(),
+  //   SHcity: z.string().min(1).optional(),
+  //   SHsuburb: z.string().min(1).optional(),
+  //   SHpostal: z.string().min(4).max(4).optional(),
+  shippingMessage     String      @default("")
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
   @@index([storeId])
 }
@@ -138,6 +178,7 @@ model OrderItem {
   order       Order       @relation(fields: [orderId], references: [id])
   productId   String
   product     Product     @relation(fields: [productId], references: [id])
+  quantity    Int         @default(1)
 
   @@index([orderId])
   @@index([productId])
