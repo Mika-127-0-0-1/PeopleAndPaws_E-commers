@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import prismadb from "@/lib/prismadb";
 import { Store as StoreIcon } from "lucide-react";
+import { ModeToggle } from "./ui/theme-toggle";
 
 const Navbar = async () => {
     const {userId} = auth();
@@ -26,6 +27,7 @@ const Navbar = async () => {
                     {stores?.[0]?.name}
                 <MainNav className="mx-6"/>
                 <div className="ml-auto flex items-center space-x-4">
+                    <ModeToggle />
                     <UserButton afterSignOutUrl="/"/>
                 </div>
             </div>

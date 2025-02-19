@@ -6,8 +6,8 @@ import { CellAction } from "./cell-action"
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type OrderColumn = {
-  id: string
-  invNumber: string
+  // id: string
+  invNumber: number
   phone: string
   address: string
   totalPrice: string
