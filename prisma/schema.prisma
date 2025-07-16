@@ -110,6 +110,8 @@ model Product {
   isArchived  Boolean     @default(false)
   sizeId      String
   size        Size        @relation(fields: [sizeId], references: [id])
+  quantity    Int         @default(1)
+  quantityLowLimit    Int         @default(0)
   // colorId     String
   // color       Color       @relation(fields: [colorId], references: [id])
   images      Image[]
@@ -143,6 +145,7 @@ model Order {
   isPaid              Boolean     @default(false)
   isShipped           Boolean     @default(false)
   shippingMethod      String
+  shippingPrice       Decimal    @default(0)
   phone               String      
   email               String      
   firstName           String      
@@ -150,21 +153,7 @@ model Order {
   vatNumber           String?
   company             String?
   address             String
-  //   streetAddress: z.string().min(1),
-  //   flatNO: z.string().optional(),
-  //   country: z.string().min(1),
-  //   province: z.string().min(1),
-  //   city: z.string().min(1),
-  //   suburb: z.string().min(1),
-  //   postal: z.string().min(4).max(4),
   shippingAddress     String      @default("")
-  //   SHstreetAddress: z.string().min(1).optional(),
-  //   SHflatNO: z.string().optional().optional(),
-  //   SHcountry: z.string().min(1).optional(),
-  //   SHprovince: z.string().min(1).optional(),
-  //   SHcity: z.string().min(1).optional(),
-  //   SHsuburb: z.string().min(1).optional(),
-  //   SHpostal: z.string().min(4).max(4).optional(),
   shippingMessage     String      @default("")
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt

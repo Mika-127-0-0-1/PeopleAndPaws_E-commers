@@ -1,5 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import PrivacyPolicyForm from "./components/privacy-form";
+import HtmlLegend from "@/components/htmllegend";
 
 
 const PrivacyPolicyPage = async ({
@@ -15,6 +16,7 @@ const PrivacyPolicyPage = async ({
 
     return (
       <div className="p-10">
+        <HtmlLegend />
         <PrivacyPolicyForm 
         initialData={Store}
         />

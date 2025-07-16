@@ -40,9 +40,9 @@ export const SocialModal = () => {
 
             const response = await axios.post(`/api/stores/${params.storeId}/socialLinks`, values);
 
-            router.push(`/${params.storeId}/settings`);
             router.refresh();
             toast.success("Social Link Added!");
+            socialModal.onClose();
 
         } catch (error) {
             toast.error("Something went wrong.");

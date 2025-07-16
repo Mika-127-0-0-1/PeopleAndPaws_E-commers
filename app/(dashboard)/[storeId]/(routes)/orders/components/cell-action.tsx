@@ -8,7 +8,7 @@ import { DropdownMenu,
     DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { OrderColumn } from "./columns";
-import { Banknote, Copy, Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
+import { Banknote, Copy, Edit, Eye, Mail, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
@@ -29,15 +29,30 @@ export const CellAction: React.FC<CellActionProps> = ({
     const [open, setOpen] = useState(false);
 
 
-    const onCopy = (id: string) => {
-        navigator.clipboard.writeText(id);
+    const onCopy = (id: number) => {
+        const formattedcopy = `THERA-${id.toString().padStart(4, '0')}`;
+        navigator.clipboard.writeText(formattedcopy);
         toast.success("Order Id copied to the clipboard.");
     };
+
+    const onEmail = async () => {
+        try {
+            setLoading(true);
+            // TODO: add email functionality
+            toast.success("Order emaild.");
+        } catch (error) {
+            toast.error("Order chould not be emaild!");
+        } finally {
+            setLoading(false);
+            setOpen(false);
+        }
+    }
 
     const onPaid = async () => {
         try {
             setLoading(true);
-            await axios.patch(`/api/stores/${params.storeId}/orders/${data.id}`);
+            // console.log(data);
+            await axios.patch(`/api/stores/${params.storeId}/checkout/${data.invNumber}`, data);
             router.refresh();
             toast.success("Order paid status changed.");
         } catch (error) {
@@ -51,7 +66,8 @@ export const CellAction: React.FC<CellActionProps> = ({
     const onDelete = async () => {
         try {
             setLoading(true);
-            await axios.delete(`/api/stores/${params.storeId}/orders/${data.id}`);
+            console.log(data.invNumber);
+            await axios.delete(`/api/stores/${params.storeId}/checkout/${data.invNumber}?orderItemId=${data.id}`);
             router.refresh();
             toast.success("Order deleted.");
         } catch (error) {
@@ -85,17 +101,21 @@ export const CellAction: React.FC<CellActionProps> = ({
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onCopy(data.id)}>
+                    <DropdownMenuItem onClick={() => onCopy(data.invNumber)}>
                         <Copy className="mr-2 h-4 w-4"/>
                         Copy Id
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/${params.storeId}/Order/${data.id}`)}>
+                    <DropdownMenuItem onClick={() => router.push(`/${params.storeId}/orders/${data.invNumber}`)}>
                         <Eye className="mr-2 h-4 w-4"/>
                         View
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onPaid}>
+                    <DropdownMenuItem onClick={() => onPaid()}>
                         <Banknote className="mr-2 h-4 w-4"/>
                         Paid?
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEmail()}>
+                        <Mail className="mr-2 h-4 w-4"/>
+                        Email?
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setOpen(true)}>
                         <Trash className="mr-2 h-4 w-4"/>

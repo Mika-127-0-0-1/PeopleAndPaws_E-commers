@@ -1,5 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import ShippingPolicyForm from "./components/ship-form";
+import HtmlLegend from "@/components/htmllegend";
 
 const ShippingPolicyPage= async ({
     params
@@ -14,6 +15,7 @@ const ShippingPolicyPage= async ({
 
     return (
         <div className="p-10">
+            <HtmlLegend />
             <ShippingPolicyForm 
             initialData={Store}/>
         </div>

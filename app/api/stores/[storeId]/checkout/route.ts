@@ -1,6 +1,4 @@
 import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs/server";
-import { connect } from "http2";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -71,7 +69,7 @@ export async function POST(
     };
 
     const decryptedData = decryptData(encrypted, iv);
-    // console.log(decryptedData);
+    // console.log(encrypted);
 
     const addressComponents = [
         decryptedData?.flatNO,

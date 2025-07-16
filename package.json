@@ -20,6 +20,7 @@
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@react-pdf/renderer": "^4.2.2",
     "@tanstack/react-table": "^8.20.1",
     "axios": "^1.7.3",
     "class-variance-authority": "^0.7.0",
@@ -42,6 +43,7 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@ag-media/react-pdf-table": "^2.0.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

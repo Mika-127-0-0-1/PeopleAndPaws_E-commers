@@ -1,5 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import TermsPolicyForm from "./components/terms-form";
+import HtmlLegend from "@/components/htmllegend";
 
 
 const TermsPolicyPage= async ({
@@ -15,6 +16,7 @@ const TermsPolicyPage= async ({
   
     return (
       <div className="p-10">
+        <HtmlLegend />
         <TermsPolicyForm 
         initialData={Store}
         />

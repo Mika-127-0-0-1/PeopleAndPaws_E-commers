@@ -41,12 +41,6 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
     const origin = useOrigin();
     const [loading, setLoading] = useState(false);
 
-    // const socialLink = await prismadb.socialList.findMany({
-    //     // where: {
-    //     //     id: params.storeId
-    //     // }
-    // });
-
     const form = useForm<SettingsFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: initialData
