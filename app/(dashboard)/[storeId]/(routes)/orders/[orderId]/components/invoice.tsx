@@ -126,23 +126,26 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
                     <Text style={styles.tableCell}>{formatter.format(item.product.price * 1)}</Text> {/* TODO: ADD Quantity */}
                 </View>
                 ))}
-
-                {/* Shipping */}
-                {data?.shippingAddress != "" && data?.shippingPrice >0 &&
-                    <View style={styles.tableRow}>
-                        <Text style={styles.tableCell}>Shipping</Text>
-                        <Text style={styles.tableCell}>{data.shippingAddress}</Text>
-                        <Text style={styles.tableCell}>{formatter.format(Number(data.shippingPrice))}</Text> {/* TODO: ADD Shipping CHECK PUDO API */}
-                        <Text style={styles.tableCell}>{formatter.format(Number(data.shippingPrice))}</Text>
-                    </View>
-                } 
+                    {/* Shipping - always shown */}
+                    {(() => {
+                        const shippingPrice = Number(data.shippingPrice || 0);
+                        // const shippingPrice = "TBD";
+                        return (
+                            <View style={styles.tableRow}>
+                                <Text style={styles.tableCell}>Shipping</Text>
+                                <Text style={styles.tableCell}>{data.shippingAddress || ""}</Text>
+                                <Text style={styles.tableCell}>{formatter.format(shippingPrice)}</Text>
+                                <Text style={styles.tableCell}>{formatter.format(shippingPrice)}</Text>
+                            </View>
+                        );
+                    })()} 
 
                 {/* Table Totals */}
                 <View style={styles.tableRow}>
                     <Text style={styles.tableCell}></Text>
                     <Text style={styles.tableCell}></Text>
                     <Text style={styles.tableCell}>TOTAL including vat.</Text>
-                    <Text style={styles.tableCell}>{formatter.format(data.orderItems.reduce((total, item) => {return total + Number(item.product.price)}, Number(data.shippingPrice)))} </Text> {/* TODO: ADD Quantity */}
+                    <Text style={styles.tableCell}>{formatter.format(data.orderItems.reduce((total, item) => {return total + Number(item.product.price)}, Number(data.shippingPrice || 0)))} </Text> {/* TODO: ADD Quantity */}
                 </View>
             </View>
 
@@ -166,7 +169,11 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
     );
     return (
         <div className="my-10">
+                
         <div className="w-full h-[500px] grid grid-cols-2">
+            {/* Shipping message display */}
+            <h2 className="text-lg font-bold mb-2">Shipping Message</h2>
+            <p className="mb-6">{data.shippingMessage ? data.shippingMessage : "No shipping message."}</p>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
                     <div className="grid grid-cols-3 gap-8">
@@ -188,6 +195,7 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
                     </Button>
                 </form>
             </Form>
+
             <PDFViewer width="100%" height="100%">
             <InvoicePDF />
             </PDFViewer>

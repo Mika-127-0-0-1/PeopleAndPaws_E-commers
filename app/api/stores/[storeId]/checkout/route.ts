@@ -1,6 +1,5 @@
 import prismadb from "@/lib/prismadb";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 
 interface DecryptedData {
     email: string;
@@ -28,25 +27,28 @@ interface DecryptedData {
   }
   
 
-const corsHeadders = {
+const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
 }
 
 export async function OPTIONS(){
-    return new NextResponse(null, {headers: corsHeadders});
+    return new NextResponse(null, {headers: corsHeaders});
 }
 
 export async function POST(
     req: Request,
     { params }: { params: {storeId: string } }
 ){
-    const {productIds, encryptedData: {encrypted, iv}} = await req.json();
-    // const {productIds} = await req.json();
+    const { productIds, contactData } = await req.json();
 
     if(!productIds || productIds.length === 0){
         return new NextResponse("Product Ids is required", {status: 400});
+    }
+
+    if(!contactData){
+        return new NextResponse("Contact data is required", {status: 400});
     }
 
     const product = await prismadb.product.findMany({
@@ -57,45 +59,44 @@ export async function POST(
         }
     });
 
-    const secretKey = crypto.createHash("sha256").update(process.env.ENCRYPTION_SECRET || "sk_test_ThDgaPIeTfMIWmoijn4MHEoCi8zH6g1mb80WQuYBfg").digest(); // Converts to 32-byte Buffer
-
-    // Decryption function
-    const decryptData = (encryptedText: string, ivHex: string): DecryptedData => {
-        const decipher = crypto.createDecipheriv("aes-256-ctr", secretKey, Buffer.from(ivHex, "hex")); // ✅ IV correctly converted
-        let decrypted = decipher.update(encryptedText, "hex", "utf8");
-        decrypted += decipher.final("utf8");
-    
-        return JSON.parse(decrypted) as DecryptedData;
-    };
-
-    const decryptedData = decryptData(encrypted, iv);
-    // console.log(encrypted);
-
     const addressComponents = [
-        decryptedData?.flatNO,
-        decryptedData?.streetAddress,
-        decryptedData?.city,
-        decryptedData?.suburb,
-        decryptedData?.province,
-        decryptedData?.country,
-        decryptedData?.postal
+        contactData.flatNO,
+        contactData.streetAddress,
+        contactData.city,
+        contactData.suburb,
+        contactData.province,
+        contactData.country,
+        contactData.postal
     ];
 
     const addressString = addressComponents.filter(Boolean).join(", ");
 
     const shipAddressComponents = [
-        decryptedData?.SHflatNO,
-        decryptedData?.SHstreetAddress,
-        decryptedData?.SHcity,
-        decryptedData?.SHsuburb,
-        decryptedData?.SHprovince,
-        decryptedData?.SHcountry,
-        decryptedData?.SHpostal
+        contactData.SHflatNO,
+        contactData.SHstreetAddress,
+        contactData.SHcity,
+        contactData.SHsuburb,
+        contactData.SHprovince,
+        contactData.SHcountry,
+        contactData.SHpostal
     ];
 
     const shipAddressString = shipAddressComponents.filter(Boolean).join(", ");
+    let shippingAddress = shipAddressString;
 
-    try {    
+    if (contactData.shipping === "Billing") {
+        shippingAddress = addressString;
+    }
+
+    if (contactData.shipping === "Collect") {
+        shippingAddress = "COLLECTION";
+    }
+
+    if (contactData.shipping === "Shipping" && !shippingAddress) {
+        return new NextResponse("Shipping address is required when shipping differs from billing", { status: 400 });
+    }
+
+    try {
         const order = await prismadb.order.create({
             data: {
                 storeId: params.storeId,
@@ -110,29 +111,31 @@ export async function POST(
                         }
                     }))
                 },
-                phone: decryptedData.phone,
-                email: decryptedData.email,
-                firstName: decryptedData.firstname,
-                lastName: decryptedData.lastname,
+                phone: contactData.phone,
+                email: contactData.email,
+                firstName: contactData.firstname,
+                lastName: contactData.lastname,
                 address: addressString,
-                shippingAddress: shipAddressString,
-                shippingMethod: decryptedData.shipping,
-                shippingMessage: decryptedData?.message,
-                vatNumber: decryptedData?.vatNumber,
+                shippingAddress,
+                shippingMethod: contactData.shipping,
+                shippingMessage: contactData.message,
+                vatNumber: contactData.vatNumber,
             }
         });
 
         return NextResponse.json({
             url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`
-    }, {
-            headers: corsHeadders});
-        } catch (error) {
-            console.error("Order creation failed:", error);
-        
-            // ✅ Error - Redirect to error page or custom fallback URL
-            return NextResponse.json({
-                url: `${process.env.FRONTEND_STORE_URL}/cart?cancel=1`
-            }, { headers: corsHeadders });
+        }, {
+            headers: corsHeaders
+        });
+    } catch (error) {
+        console.error("Order creation failed:", error);
+
+        return NextResponse.json({
+            url: `${process.env.FRONTEND_STORE_URL}/cart?cancel=1`
+        }, {
+            headers: corsHeaders
+        });
     }
 }
 // TODO: Quantities are not Implement

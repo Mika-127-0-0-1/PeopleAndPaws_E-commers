@@ -66,8 +66,9 @@ export const CellAction: React.FC<CellActionProps> = ({
     const onDelete = async () => {
         try {
             setLoading(true);
-            console.log(data.invNumber);
-            await axios.delete(`/api/stores/${params.storeId}/checkout/${data.invNumber}?orderItemId=${data.id}`);
+            await axios.delete(`/api/stores/${params.storeId}/checkout/${data.invNumber}`, {
+                params: { orderItemId: data.id },
+            });
             router.refresh();
             toast.success("Order deleted.");
         } catch (error) {
