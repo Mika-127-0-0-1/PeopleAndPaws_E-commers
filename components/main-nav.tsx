@@ -43,11 +43,6 @@ export function MainNav({
             active: pathname.startsWith(`/${params.storeId}/products`),
         },
         {
-            href: `/${params.storeId}/physical-therapy`,
-            lable: 'Physical Therapy',
-            active: pathname.startsWith(`/${params.storeId}/physical-therapy`),
-        },
-        {
             href: `/${params.storeId}/orders`,
             lable: 'Orders',
             active: pathname === `/${params.storeId}/orders`,
