@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import prismadb from "@/lib/prismadb";
 import { formatter } from "@/lib/utils";
 import { CreditCardIcon, Package } from "lucide-react";
+import { getCurrentYearRange } from "@/actions/get-current-year-range";
 
 interface DashboardPageProps {
     params: { storeId: string }
@@ -27,6 +28,7 @@ const DashboardPage: React.FC<DashboardPageProps> = async ({
     const graphRevenue = await getGraphRevenue(params.storeId);
     const salesCount = await getSalesCount(params.storeId);
     const stockCount = await getStockCount(params.storeId);
+    const { currentYear } = getCurrentYearRange();
 
     return(
         <div className="flex-col">
@@ -37,7 +39,7 @@ const DashboardPage: React.FC<DashboardPageProps> = async ({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Total Revenue
+                                Total Revenue ({currentYear})
                             </CardTitle>
                             <span className="h-4 w-4 text-muted-foreground">R</span>
                         </CardHeader>
@@ -50,7 +52,7 @@ const DashboardPage: React.FC<DashboardPageProps> = async ({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Sales
+                                Sales ({currentYear})
                             </CardTitle>
                             <CreditCardIcon className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
@@ -76,7 +78,7 @@ const DashboardPage: React.FC<DashboardPageProps> = async ({
                 </div>
                 <Card className="col-span-4">
                     <CardHeader >
-                        <CardTitle >Overview</CardTitle>
+                        <CardTitle>Overview ({currentYear})</CardTitle>
                     </CardHeader>
                     <CardContent className="pl-2">
                         <Overview data={graphRevenue}/>

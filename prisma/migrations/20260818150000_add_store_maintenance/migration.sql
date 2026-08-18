@@ -1,0 +1,2 @@
+ALTER TABLE "Store"
+ADD COLUMN "isMaintenance" BOOLEAN NOT NULL DEFAULT false;

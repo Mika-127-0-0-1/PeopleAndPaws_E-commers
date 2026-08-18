@@ -2,6 +2,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Separator } from "@/components/ui/separator";
 import prismadb from "@/lib/prismadb";
 import InvoiceFile from "./components/invoice";
+import { notFound } from "next/navigation";
 
 const OrderPage = async ({
     params
@@ -20,6 +21,10 @@ const OrderPage = async ({
             },
         },
     });
+
+    if (!order) {
+        notFound();
+    }
 
     return (
         <div className="flex-col">

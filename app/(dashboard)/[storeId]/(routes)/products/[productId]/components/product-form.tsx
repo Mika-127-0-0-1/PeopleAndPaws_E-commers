@@ -19,11 +19,14 @@ import { AlertModal } from "@/components/modals/alert-modal";
 import ImageUpload from "@/components/ui/image-upload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
     name: z.string().min(1),
+    description: z.string().trim().min(1, "Description is required"),
     images: z.object({ url: z.string() }).array(),
     price: z.coerce.number().min(1),
+    quantity: z.coerce.number().int().min(1).max(99),
     sizeId: z.string().min(1),
     // colorId: z.string().min(1),
     categoryId: z.string().min(1),
@@ -63,12 +66,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         defaultValues: initialData ? {
             ...initialData,
             price: parseFloat(String(initialData?.price)),
+            quantity: Number(initialData.quantity),
         } : {
             name: "",
+            description: "",
             images: [],
             isFeatured: false,
             isArchived: false,
             price: 0,
+            quantity: 1,
             sizeId: "",
             // colorId: "",
             categoryId: "",
@@ -165,6 +171,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                 <FormMessage />
                             </FormItem>
                         )}/>
+                        <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem className="col-span-3">
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                    disabled={loading}
+                                    placeholder="Describe the product"
+                                    rows={6}
+                                    {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
                         <FormField 
                         control={form.control}
                         name="price"
@@ -178,6 +201,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                             </FormItem>
                         )}/>
                         <FormField 
+                        control={form.control}
+                        name="quantity"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Quantity</FormLabel>
+                                <FormControl>
+                                    <Input
+                                    disabled={loading}
+                                    type="number"
+                                    min={1}
+                                    max={99}
+                                    step={1}
+                                    placeholder="1"
+                                    {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField
                         control={form.control}
                         name="categoryId"
                         render={({ field }) => (

@@ -16,6 +16,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Separator } from "@/components/ui/separator";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 // import { AlertModal } from "@/components/modals/alert-modal";
 import { ApiAlert } from "@/components/ui/api-alert";
 import { useOrigin } from "@/hooks/use-origen";
@@ -28,6 +29,7 @@ interface SettingsFormProps {
 
 const formSchema = z.object({
     name: z.string().min(1),
+    isMaintenance: z.boolean(),
 });
 
 type SettingsFormValues = z.infer<typeof formSchema>;
@@ -140,6 +142,27 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
                                 <FormControl>
                                     <Input disabled={loading} placeholder="Store name "{...field}/>
                                 </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField
+                        control={form.control}
+                        name="isMaintenance"
+                        render={({ field }) => (
+                            <FormItem className="flex items-start gap-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                    <Checkbox
+                                        disabled={loading}
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                    <FormLabel>Maintenance mode</FormLabel>
+                                    <p className="text-sm text-muted-foreground">
+                                        Show only the maintenance page on the storefront.
+                                    </p>
+                                </div>
                                 <FormMessage />
                             </FormItem>
                         )}/>

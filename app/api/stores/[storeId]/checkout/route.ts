@@ -1,32 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import { NextResponse } from "next/server";
-
-interface DecryptedData {
-    email: string;
-    firstname: string;
-    lastname: string;
-    phone: string;
-    company?: string;
-    vatNumber?: string;
-    shipping: string;
-    message?: string;
-    flatNO: string;
-    streetAddress: string;
-    city: string;
-    suburb: string;
-    province: string;
-    country: string;
-    postal: string;
-    SHflatNO?: string;
-    SHstreetAddress?: string;
-    SHcity?: string;
-    SHsuburb?: string;
-    SHprovince?: string;
-    SHcountry?: string;
-    SHpostal?: string;
-  }
   
-
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -41,23 +15,57 @@ export async function POST(
     req: Request,
     { params }: { params: {storeId: string } }
 ){
-    const { productIds, contactData } = await req.json();
+    const { orderItems, contactData } = await req.json();
 
-    if(!productIds || productIds.length === 0){
-        return new NextResponse("Product Ids is required", {status: 400});
+    if(!Array.isArray(orderItems) || orderItems.length === 0){
+        return new NextResponse("Order items are required", {status: 400});
     }
 
     if(!contactData){
         return new NextResponse("Contact data is required", {status: 400});
     }
 
-    const product = await prismadb.product.findMany({
+    const invalidOrderItem = orderItems.some((item: unknown) => {
+        if (!item || typeof item !== "object") {
+            return true;
+        }
+
+        const { productId, quantity } = item as {
+            productId?: unknown;
+            quantity?: unknown;
+        };
+
+        return (
+            typeof productId !== "string" ||
+            !Number.isInteger(quantity) ||
+            Number(quantity) < 1 ||
+            Number(quantity) > 99
+        );
+    });
+
+    if (invalidOrderItem) {
+        return new NextResponse(
+            "Each order item requires a productId and a quantity from 1 to 99",
+            { status: 400 }
+        );
+    }
+
+    const productIds = orderItems.map((item: { productId: string }) => item.productId);
+    const products = await prismadb.product.findMany({
         where: {
+            storeId: params.storeId,
             id: {
                 in: productIds
             }
-        }
+        },
+        select: {
+            id: true,
+        },
     });
+
+    if (products.length !== new Set(productIds).size) {
+        return new NextResponse("One or more products are invalid", { status: 400 });
+    }
 
     const addressComponents = [
         contactData.flatNO,
@@ -103,12 +111,9 @@ export async function POST(
                 isPaid: false,
                 isShipped: false,
                 orderItems: {
-                    create: productIds.map((productId: string) => ({
-                        product: {
-                            connect: {
-                                id: productId
-                            }
-                        }
+                    create: orderItems.map((item: { productId: string; quantity: number }) => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
                     }))
                 },
                 phone: contactData.phone,
@@ -138,4 +143,3 @@ export async function POST(
         });
     }
 }
-// TODO: Quantities are not Implement

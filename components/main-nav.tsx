@@ -40,7 +40,12 @@ export function MainNav({
         {
             href: `/${params.storeId}/products`,
             lable: 'Products',
-            active: pathname === `/${params.storeId}/products` || pathname ===`/${params.storeId}/products/new`,
+            active: pathname.startsWith(`/${params.storeId}/products`),
+        },
+        {
+            href: `/${params.storeId}/physical-therapy`,
+            lable: 'Physical Therapy',
+            active: pathname.startsWith(`/${params.storeId}/physical-therapy`),
         },
         {
             href: `/${params.storeId}/orders`,

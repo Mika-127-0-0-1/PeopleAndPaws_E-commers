@@ -1,4 +1,5 @@
 import prismadb from "@/lib/prismadb";
+import { getCurrentYearRange } from "@/actions/get-current-year-range";
 
 interface GraphData {
     name: string;
@@ -6,10 +7,16 @@ interface GraphData {
 }
 
 export const getGraphRevenue = async (storeId: string) => {
+    const { startOfYear, startOfNextYear } = getCurrentYearRange();
+
     const graphRevenue = await prismadb.order.findMany({
         where: {
             storeId,
             isPaid: true,
+            createdAt: {
+                gte: startOfYear,
+                lt: startOfNextYear,
+            },
         },
         include: {
             orderItems: {
@@ -22,14 +29,12 @@ export const getGraphRevenue = async (storeId: string) => {
 
     const monthlyRevenue: { [key: string]: number } = {};
 
-    // TODO: Quantaty is not available in the orderItem
     for (const order of graphRevenue) {
-        const month = order.createdAt.getMonth();
+        const month = order.createdAt.getUTCMonth();
         let revenueForOrder = 0;
 
         for (const orderItem of order.orderItems) {
-            revenueForOrder += orderItem.product.price.toNumber();
-            //  * orderItem.quantity;
+            revenueForOrder += orderItem.product.price.toNumber() * orderItem.quantity;
         }
 
         monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenueForOrder;

@@ -33,13 +33,16 @@ export async function PATCH(
         const { userId } = auth();
         const body = await req.json();
 
-        const { name } = body;
+        const { name, isMaintenance } = body;
 
         if (!userId) {
             return new NextResponse("Unauthenticated", {status: 401});
         }
         if (!name) {
             return new NextResponse("Name is required", {status: 400});
+        }
+        if (typeof isMaintenance !== "boolean") {
+            return new NextResponse("Maintenance status is required", {status: 400});
         }
 
         if(!params.storeId) {
@@ -52,7 +55,8 @@ export async function PATCH(
                 userId
             },
             data: {
-                name
+                name,
+                isMaintenance
             }
         });
 

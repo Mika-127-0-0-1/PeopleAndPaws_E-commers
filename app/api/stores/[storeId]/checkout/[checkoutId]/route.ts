@@ -4,16 +4,26 @@ import { NextResponse } from "next/server";
 
 export async function GET(
     req: Request,
-    { params }: { params: { invNum: number } } // Have to be second argument
+    { params }: { params: { storeId: string, checkoutId: string } }
 ){
     try{
-        if(!params.invNum) {
+        const invoiceNumber = Number(params.checkoutId);
+
+        if(!invoiceNumber) {
             return new NextResponse("Invoice number is required", {status: 400});
         }
 
-        const order = await prismadb.order.findUnique({
+        const order = await prismadb.order.findFirst({
             where: {
-                orderNumber: params.invNum,
+                orderNumber: invoiceNumber,
+                storeId: params.storeId,
+            },
+            include: {
+                orderItems: {
+                    include: {
+                        product: true,
+                    },
+                },
             },
         });
 

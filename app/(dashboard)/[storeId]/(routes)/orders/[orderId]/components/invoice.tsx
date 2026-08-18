@@ -13,6 +13,7 @@ import { useState } from 'react';
 import toast from "react-hot-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import type { Prisma } from "@prisma/client";
 
 const formSchema = z.object({
     shippingPrice: z.coerce.number(),
@@ -21,7 +22,15 @@ const formSchema = z.object({
 type ShippingFormValues = z.infer<typeof formSchema>;
 
 interface InvoiceProps {
-    data: any;
+    data: Prisma.OrderGetPayload<{
+        include: {
+            orderItems: {
+                include: {
+                    product: true;
+                };
+            };
+        };
+    }>;
 };
 
 const InvoiceFile: React.FC<InvoiceProps> = ({
@@ -33,12 +42,11 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
 
     const form = useForm<ShippingFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: data.shippingPrice || {
-            shippingPrice: "",
+        defaultValues: {
+            shippingPrice: Number(data.shippingPrice),
         }
     });
 
-    //TODO: (Maybe) Also change shipping address??
     const onSubmit = async (formData: ShippingFormValues) => {
         try {
             setLoading(true);
@@ -64,10 +72,12 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
         <Page size="A4" style={styles.page}>
         <View>
                 {/* Watermark Image */}
+                {/* eslint-disable-next-line jsx-a11y/alt-text -- React PDF images do not support the HTML alt prop. */}
                 <Image src={`${window.location.origin}/favicon_Final_img.png`} style={styles.background} />
             <View style={styles.header}>
             {/* <View> */}
                 {/* Logo Image */}
+                {/* eslint-disable-next-line jsx-a11y/alt-text -- React PDF images do not support the HTML alt prop. */}
                 <Image src={`${window.location.origin}/Therapeuo_logo.jpg`} style={styles.logoIMG}/>
             {/* </View> */}
             <View style={styles.spaceY}>
@@ -121,9 +131,9 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
                 {data?.orderItems.map((item) => (
                     <View key={item.id} style={styles.tableRow}>
                     <Text style={styles.tableCell}>{item.product.name}</Text>
-                    <Text style={styles.tableCell}>{item.product.name}</Text>
-                    <Text style={styles.tableCell}>{formatter.format(item.product.price)}</Text>
-                    <Text style={styles.tableCell}>{formatter.format(item.product.price * 1)}</Text> {/* TODO: ADD Quantity */}
+                    <Text style={styles.tableCell}>{item.quantity}</Text>
+                    <Text style={styles.tableCell}>{formatter.format(Number(item.product.price))}</Text>
+                    <Text style={styles.tableCell}>{formatter.format(Number(item.product.price) * item.quantity)}</Text>
                 </View>
                 ))}
                     {/* Shipping - always shown */}
@@ -145,16 +155,16 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
                     <Text style={styles.tableCell}></Text>
                     <Text style={styles.tableCell}></Text>
                     <Text style={styles.tableCell}>TOTAL including vat.</Text>
-                    <Text style={styles.tableCell}>{formatter.format(data.orderItems.reduce((total, item) => {return total + Number(item.product.price)}, Number(data.shippingPrice || 0)))} </Text> {/* TODO: ADD Quantity */}
+                    <Text style={styles.tableCell}>{formatter.format(data.orderItems.reduce((total, item) => {return total + (Number(item.product.price) * item.quantity)}, Number(data.shippingPrice || 0)))} </Text>
                 </View>
             </View>
 
             <View style={styles.spaceY}>
             <Text style={styles.billTo}>Please make all electronic payments to:</Text>
-            <Text style={styles.textBold}>Account holder:       Sonet</Text>
-            <Text style={styles.textBold}>Bank name:            Tyme Bank</Text>
-            <Text style={styles.textBold}>Account number:   510 483 821 59</Text>
-            <Text style={styles.textBold}>Branch code:          678910</Text>
+            <Text style={styles.textBold}>Account holder:          Sonet</Text>
+            <Text style={styles.textBold}>Bank name:                Tyme Bank</Text>
+            <Text style={styles.textBold}>Account number:       510 483 821 59</Text>
+            <Text style={styles.textBold}>Branch code:              678910</Text>
             <Text style={styles.textBold}>Use payment reference: {formattedInvoiceNo}</Text>
             </View>
 
@@ -168,52 +178,52 @@ const InvoiceFile: React.FC<InvoiceProps> = ({
         </Document>
     );
     return (
-        <div className="my-10">
-                
-        <div className="w-full h-[500px] grid grid-cols-2">
-            {/* Shipping message display */}
-            <h2 className="text-lg font-bold mb-2">Shipping Message</h2>
-            <p className="mb-6">{data.shippingMessage ? data.shippingMessage : "No shipping message."}</p>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-                    <div className="grid grid-cols-3 gap-8">
-                        <FormField 
-                        control={form.control}
-                        name="shippingPrice"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Shipping Price</FormLabel>
-                                <FormControl>
-                                    <Input disabled={loading} placeholder="130 "{...field}/>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}/>
-                    </div>
-                    <Button disabled={loading} className="ml-auto" type="submit">
-                        Submit shipping price
-                    </Button>
-                </form>
-            </Form>
+        <div className="my-10 grid min-h-[calc(100vh-5rem)] grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="flex min-w-0 flex-col space-y-8">
+                <div>
+                    <h2 className="mb-2 text-lg font-bold">Shipping Message</h2>
+                    <p>{data.shippingMessage ? data.shippingMessage : "No shipping message."}</p>
+                </div>
 
-            <PDFViewer width="100%" height="100%">
-            <InvoicePDF />
-            </PDFViewer>
-        </div>
-        <div className="mt-6 flex justify-center gap-6">
-            <PDFDownloadLink document={<InvoicePDF />} fileName={`${formattedInvoiceNo}.pdf`}>
-            {/* <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300"> */}
-            <Button>
-                Download PDF
-            </Button>    
-            {/* </button> */}
-            </PDFDownloadLink>
-            <Button onClick={() => router.push(`/${params.storeId}/orders`)}>
-                Back
-            </Button>
-        </div>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
+                        <FormField
+                            control={form.control}
+                            name="shippingPrice"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Shipping Price</FormLabel>
+                                    <FormControl>
+                                        <Input disabled={loading} placeholder="130" {...field}/>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                        <Button disabled={loading} type="submit">
+                            Submit shipping price
+                        </Button>
+                    </form>
+                </Form>
+
+                <div className="flex flex-wrap gap-6">
+                    <PDFDownloadLink document={<InvoicePDF />} fileName={`${formattedInvoiceNo}.pdf`}>
+                        <Button>
+                            Download PDF
+                        </Button>
+                    </PDFDownloadLink>
+                    <Button onClick={() => router.push(`/${params.storeId}/orders`)}>
+                        Back
+                    </Button>
+                </div>
+            </div>
+
+            <div className="min-h-[700px] min-w-0 overflow-hidden rounded-md border">
+                <PDFViewer width="100%" height="100%">
+                    <InvoicePDF />
+                </PDFViewer>
+            </div>
         </div>
     );
 }
 
-export default InvoiceFile; 
+export default InvoiceFile;
