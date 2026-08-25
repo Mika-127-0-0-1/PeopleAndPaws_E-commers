@@ -1,7 +1,20 @@
 import prismadb from "@/lib/prismadb";
 import { getCurrentYearRange } from "@/actions/get-current-year-range";
+import { Prisma } from "@prisma/client";
 
-export const getTotalRevenue = async (storeId: string) => {
+type PaidOrder = Prisma.OrderGetPayload<{
+    include: {
+        orderItems: {
+            include: {
+                product: true;
+            };
+        };
+    };
+}>;
+
+type PaidOrderItem = PaidOrder["orderItems"][number];
+
+export const getTotalRevenue = async (storeId: string): Promise<number> => {
     const { startOfYear, startOfNextYear } = getCurrentYearRange();
 
     const paidOrders = await prismadb.order.findMany({
@@ -19,13 +32,14 @@ export const getTotalRevenue = async (storeId: string) => {
                     product: true,
                 },
             },
-    }});
+        },
+    });
 
-    const totalRevenue = paidOrders.reduce((total, order) => {
-        return total + order.orderItems.reduce((total, item) => {
-            return total + (item.product.price.toNumber() * item.quantity);
+    const totalRevenue = paidOrders.reduce<number>((total: number, order: PaidOrder) => {
+        return total + order.orderItems.reduce<number>((orderTotal: number, item: PaidOrderItem) => {
+            return orderTotal + (item.product.price.toNumber() * item.quantity);
         }, 0);
     }, 0);
 
     return totalRevenue;
-}
+};
