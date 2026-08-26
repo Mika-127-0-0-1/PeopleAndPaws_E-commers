@@ -6,6 +6,7 @@ const nextConfig = {
             "res.cloudinary.com"
         ]
     },
+    staticPageGenerationTimeout: 180,
     experimental: {
         cpus: 1
     }
