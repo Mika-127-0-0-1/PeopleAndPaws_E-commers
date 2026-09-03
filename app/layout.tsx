@@ -16,7 +16,6 @@ import { ThemeProvider } from "@/providers/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
